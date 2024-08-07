@@ -1,4 +1,4 @@
-__version__ = 152
+__version__ = 200
 
 PLUGIN_ID = "com.github.KillerBOSS2019.WinMediaMixer"
 
@@ -13,7 +13,7 @@ TP_PLUGIN_INFO = {
         'colorLight': "#3d62ad"
     },
     'doc': {
-        "description": "This is an example plugin for Touch Portal. It demonstrates the basics of how to create a plugin, and how to communicate with Touch Portal.",
+        "description": "Control Windows Media for Audio Devices and Applications",
         "repository": "KillerBOSS2019:TouchPortal-Windows-MediaMixer",
         "Install": "1. Download .tpp file\n2. in TouchPortal gui click gear icon and select 'Import Plugin'\n3. Select the .tpp file\n4. Click 'Import'",
     }
@@ -35,11 +35,27 @@ TP_PLUGIN_CATEGORIES = {
         'id': PLUGIN_ID + ".main",
         'name' : "Windows Media Mixer",
         'imagepath' : "%TP_PLUGIN_FOLDER%TouchPortalMediaMixer\\icon.png"
-    }
+    },
+    "Default Input Devices": {
+        'id': PLUGIN_ID + ".inputDevices",
+        'name' : "Default Input Devices",
+        'imagepath' : "%TP_PLUGIN_FOLDER%TouchPortalMediaMixer\\icon.png"
+    },
+    "Default Output Devices": {
+        'id': PLUGIN_ID + ".outputDevices",
+        'name' : "Default Output Devices",
+        'imagepath' : "%TP_PLUGIN_FOLDER%TouchPortalMediaMixer\\icon.png"
+    },
+    "Focused App": {
+        'id': PLUGIN_ID + ".focusedApp",
+        'name' : "Current Focused App",
+        'imagepath' : "%TP_PLUGIN_FOLDER%TouchPortalMediaMixer\\icon.png"
+    },
 }
 
 TP_PLUGIN_CONNECTORS = {
-    "APP control": {
+    "APP Volume Slider": {
+        'category': "main",
         "id": PLUGIN_ID + ".connector.APPcontrol",
         "name": "Volume Mixer: APP Volume slider",
         "format": "Control volume for $[1]",
@@ -48,58 +64,53 @@ TP_PLUGIN_CONNECTORS = {
             "appchoice": {
                 "id": PLUGIN_ID + ".connector.APPcontrol.data.slidercontrol",
                 "type": "choice",
-                "label": "APP choice list for APP control slider",
+                "label": "APP choice list for APP Volume slider",
                 "default": "",
                 "valueChoices": []
             }
         }
     },
-    ## Disabled because it was too much for plugin to handle
-    # "Windows Audio": {
-    #     "id": PLUGIN_ID + ".connector.WinAudio",
-    #     "name": "Volume Mixer: Windows Volume slider",
-    #     "format": "Control Windows Audio$[1] device$[2]",
-    #     "label": "control windows Volume",
-    #     "data": {
-    #         'deviceType': {
-    #             'id': PLUGIN_ID + ".connector.WinAudio.deviceType",
-    #             'type': "choice",
-    #             'label': "device type",
-    #             'default': "Pick One",
-    #             "valueChoices": [
-    #                 "Output",
-    #                 "Input"
-    #             ]
-    #         },
-    #         'deviceOption': {
-    #             'id': PLUGIN_ID + ".connector.WinAudio.devices",
-    #             'type': "choice",
-    #             'label': "Device choice list",
-    #             'default': "",
-    #             "valueChoices": []
-    #         },
-    #     }
-    # }
+    "Device Volume Slider": {
+        'category': "main",
+        "id": PLUGIN_ID + ".connector.WinAudio",
+        "name": "Volume Mixer: Windows Volume slider",
+        "format": "Control Device Volume $[1] device$[2]",
+        "label": "control windows Volume",
+        "data": {
+            'deviceType': {
+                'id': PLUGIN_ID + ".connector.WinAudio.deviceType",
+                'type': "choice",
+                'label': "device type",
+                'default': "Pick One",
+                "valueChoices": [
+                    "Output",
+                    "Input"
+                ]
+            },
+            'deviceOption': {
+                'id': PLUGIN_ID + ".connector.WinAudio.devices",
+                'type': "choice",
+                'label': "Device choice list",
+                'default': "",
+                "valueChoices": []
+            },
+        }
+    }
 }
 
 TP_PLUGIN_ACTIONS = {
     'AppMute': {
-        # 'category' is optional, if omitted then this action will be added to all, or the only, category(ies)
         'category': "main",
         'id': PLUGIN_ID + ".act.Mute/Unmute",
-        'name': 'Volume Mixer: Mute/Unmute process volume',
+        'name': 'Mute/Unmute process volume',
         'prefix': TP_PLUGIN_CATEGORIES['main']['name'],
         'type': "communicate",
         'tryInline': True,
-        # 'format' tokens like $[1] will be replaced in the generated JSON with the corresponding data id wrapped with "{$...$}".
-        # Numeric token values correspond to the order in which the data items are listed here, while text tokens correspond
-        # to the last part of a dotted data ID (the part after the last period; letters, numbers, and underscore allowed).
         'format': "$[1]$[2]app",
         "doc": "Mute/Unmute process volume",
         'data': {
             'appChoice': {
                 'id': PLUGIN_ID + ".act.Mute/Unmute.data.process",
-                # "text" is the default type and could be omitted here
                 'type': "choice",
                 'label': "process list",
                 'default': "",
@@ -120,7 +131,6 @@ TP_PLUGIN_ACTIONS = {
         }
     },
     'Inc/DecrVol': {
-        # 'category' is optional, if omitted then this action will be added to all, or the only, category(ies)
         'category': "main",
         'id': PLUGIN_ID + ".act.Inc/DecrVol",
         'name': 'Adjust App Volume',
@@ -133,7 +143,6 @@ TP_PLUGIN_ACTIONS = {
         'data': {
             'AppChoice': {
                 'id': PLUGIN_ID + ".act.Inc/DecrVol.data.process",
-                # "text" is the default type and could be omitted here
                 'type': "choice",
                 'label': "process list",
                 'default': "",
@@ -160,22 +169,17 @@ TP_PLUGIN_ACTIONS = {
         }
     },
     'ChangeOut/Input': {
-        # 'category' is optional, if omitted then this action will be added to all, or the only, category(ies)
         'category': "main",
         'id': PLUGIN_ID + ".act.ChangeAudioOutput",
         'name': 'Audio Output/Input Device Switcher',
         'prefix': TP_PLUGIN_CATEGORIES['main']['name'],
         'type': "communicate",
         'tryInline': True,
-        # 'format' tokens like $[1] will be replaced in the generated JSON with the corresponding data id wrapped with "{$...$}".
-        # Numeric token values correspond to the order in which the data items are listed here, while text tokens correspond
-        # to the last part of a dotted data ID (the part after the last period; letters, numbers, and underscore allowed).
         'format': "Change audio device$[1]$[2]$[3]",
         "doc": "Change Default Audio Devices",
         'data': {
             'optionSel': {
                 'id': PLUGIN_ID + ".act.ChangeAudioOutput.choice",
-                # "text" is the default type and could be omitted here
                 'type': "choice",
                 'label': "process list",
                 'default': "Pick One",
@@ -194,7 +198,6 @@ TP_PLUGIN_ACTIONS = {
             },
             'setType': {
                 'id': PLUGIN_ID + ".act.ChangeAudioOutput.setType",
-                # "text" is the default type and could be omitted here
                 'type': "choice",
                 'label': "Set audio device type",
                 'default': "Default",
@@ -207,22 +210,17 @@ TP_PLUGIN_ACTIONS = {
         }
     },
     'ToggleOut/Input': {
-        # 'category' is optional, if omitted then this action will be added to all, or the only, category(ies)
         'category': "main",
         'id': PLUGIN_ID + ".act.ToggleAudioOutput",
         'name': 'Audio Output/Input Device Toggle',
         'prefix': TP_PLUGIN_CATEGORIES['main']['name'],
         'type': "communicate",
         'tryInline': True,
-        # 'format' tokens like $[1] will be replaced in the generated JSON with the corresponding data id wrapped with "{$...$}".
-        # Numeric token values correspond to the order in which the data items are listed here, while text tokens correspond
-        # to the last part of a dotted data ID (the part after the last period; letters, numbers, and underscore allowed).
         'format': "Toggle audio device$[1]$[2]$[3]$[4]",
         "doc": "Toggle Default Audio Devices",
         'data': {
             'optionSel': {
                 'id': PLUGIN_ID + ".act.ToggleAudioOutput.choice",
-                # "text" is the default type and could be omitted here
                 'type': "choice",
                 'label': "process list",
                 'default': "Pick One",
@@ -247,7 +245,6 @@ TP_PLUGIN_ACTIONS = {
             },
             'setType': {
                 'id': PLUGIN_ID + ".act.ToggleAudioOutput.setType",
-                # "text" is the default type and could be omitted here
                 'type': "choice",
                 'label': "Set audio device type",
                 'default': "Default",
@@ -260,17 +257,14 @@ TP_PLUGIN_ACTIONS = {
         }
     },
     'setDeviceVolume': {
-        # 'category' is optional, if omitted then this action will be added to all, or the only, category(ies)
         'category': "main",
         'id': PLUGIN_ID + ".act.changeDeviceVolume",
         'name': 'Set Device Volume',
         'prefix': TP_PLUGIN_CATEGORIES['main']['name'],
         'type': "communicate",
         'tryInline': True,
-        # 'format' tokens like $[1] will be replaced in the generated JSON with the corresponding data id wrapped with "{$...$}".
-        # Numeric token values correspond to the order in which the data items are listed here, while text tokens correspond
-        # to the last part of a dotted data ID (the part after the last period; letters, numbers, and underscore allowed).
-        'format': "Set Volume$[1]device$[2]to$[3]%",
+        'format': "$[4] Volume$[1]device$[2]to$[3]%",
+        "hasHoldFunctionality": True,
         "doc": "Change Default Audio Devices",
         'data': {
             'deviceType': {
@@ -296,10 +290,60 @@ TP_PLUGIN_ACTIONS = {
                 'label': "Volume",
                 "default": "10"
             },
+            'OptionList': {
+                'id': PLUGIN_ID + ".act.changeDeviceVolume.choice",
+                'type': "choice",
+                'label': "Option choice",
+                'default': "Increase",
+                "valueChoices": [
+                    "Increase",
+                    "Decrease",
+                    "Set"
+                ]
+            },
+        }
+    },
+    'setDeviceMute': {
+        'category': "main",
+        'id': PLUGIN_ID + ".act.changeDeviceMute",
+        'name': 'Set Device Mute',
+        'prefix': TP_PLUGIN_CATEGORIES['main']['name'],
+        'type': "communicate",
+        'tryInline': True,
+        'format': "Set Mute$[1]device$[2]to$[3]",
+        "doc": "Change Default Audio Devices",
+        'data': {
+            'deviceType': {
+                'id': PLUGIN_ID + ".act.changeDeviceMute.deviceType",
+                'type': "choice",
+                'label': "device type",
+                'default': "Pick One",
+                "valueChoices": [
+                    "Output",
+                    "Input"
+                ]
+            },
+            'deviceOption': {
+                'id': PLUGIN_ID + ".act.changeDeviceMute.devices",
+                'type': "choice",
+                'label': "Device choice list",
+                'default': "",
+                "valueChoices": []
+            },
+            'muteChoice': {
+                'id': PLUGIN_ID + ".act.changeDeviceMute.choices",
+                'type': "choice",
+                'label': "Volume",
+                "default": "Toggle",
+                "valueChoices": [
+                    "Toggle",
+                    "Mute",
+                    "Un-Mute"
+                ]
+            },
         }
     },
     'AppAudioSwitch': {
-        # 'category' is optional, if omitted then this action will be added to all, or the only, category(ies)
         'category': "main",
         'id': PLUGIN_ID + ".act.appAudioSwitch",
         'name': 'Individual App Audio Device switcher',
@@ -340,58 +384,80 @@ TP_PLUGIN_ACTIONS = {
 
 TP_PLUGIN_STATES = {
     'outputDevice': {
-        # 'category' is optional, if omitted then this state will be added to all, or the only, category(ies)
-        'category': "main",
+        'category': "Default Output Devices",
         'id': PLUGIN_ID + ".state.CurrentOutputDevice",
-        # "text" is the default type and could be omitted here
         'type': "text",
-        'desc': "Audio Device: Get default Output devices",
-        # we can conveniently use a value here which we already defined above
+        'desc': "Audio Device: Default Output Device",
         'default': ""
     },
-    'outputcommicationDevice': {
-        # 'category' is optional, if omitted then this state will be added to all, or the only, category(ies)
-        'category': "main",
+    'outputDeviceCommunication': {
+        'category': "Default Output Devices",
         'id': PLUGIN_ID + ".state.CurrentOutputCommicationDevice",
-        # "text" is the default type and could be omitted here
         'type': "text",
-        'desc': "Audio Device: Get default Output Communications devices",
-        # we can conveniently use a value here which we already defined above
+        'desc': "Audio Device: Default Output Communications Device",
         'default': ""
     },
     'inputDevice': {
-        'category': "main",
+        'category': "Default Input Devices",
         'id': PLUGIN_ID + ".state.CurrentInputDevice",
         'type': "text",
-        'desc': "Audio Device: Get default input device",
+        'desc': "Audio Device: Default Input Device",
         'default': ""
     },
-    'inputDeviceCommication': {
-        'category': "main",
+    'inputDeviceCommunication': {
+        'category': "Default Input Devices",
         'id': PLUGIN_ID + ".state.CurrentInputCommucationDevice",
         'type': "text",
-        'desc': "Audio Device: Get default input Communications device",
+        'desc': "Audio Device: Default Input Communications Device",
+        'default': ""
+    },
+    'master volume': {
+        'category': "Default Output Devices",
+        'id': PLUGIN_ID + ".state.currentMasterVolume",
+        'type': "text",
+        'desc': "Volume Mixer: Master Output Volume",
+        'default': ""
+    },
+    'master volume mute': {
+        'category': "Default Output Devices",
+        'id': PLUGIN_ID + ".state.currentMasterVolumeMute",
+        'type': "text",
+        'desc': "Volume Mixer: Master Output Volume Mute",
+        'default': ""
+    },
+    'master volume input': {
+        'category': "Default Input Devices",
+        'id': PLUGIN_ID + ".state.currentInputMasterVolume",
+        'type': "text",
+        'desc': "Volume Mixer: Master Input Volume",
+        'default': ""
+    },
+    'master volume input mute': {
+        'category': "Default Input Devices",
+        'id': PLUGIN_ID + ".state.currentInputMasterVolumeMute",
+        'type': "text",
+        'desc': "Volume Mixer: Master Input Volume Mute",
         'default': ""
     },
     'FocusedAPP': {
-        'category': "main",
+        'category': "Focused App",
         'id': PLUGIN_ID + ".state.currentFocusedAPP",
         'type': "text",
-        'desc': "Volume Mixer: current focused app",
+        'desc': "Volume Mixer: Current Focused App",
         'default': ""
     },
     'currentAppVolume': {
-        'category': "main",
+        'category': "Focused App",
         'id': PLUGIN_ID + ".state.currentAppVolume",
         'type': "text",
-        "desc": "Volume Mixer: focused app volume",
+        "desc": "Volume Mixer: Current Focused App volume",
         "default": ""
     },
-    'master volume': {
-        'category': "main",
-        'id': PLUGIN_ID + ".state.currentMasterVolume",
+    'currentAppMute': {
+        'category': "Focused App",
+        'id': PLUGIN_ID + ".state.currentAppMute",
         'type': "text",
-        'desc': "Volume Mixer: Get Current Master volume",
-        'default': ""
-    }
+        "desc": "Volume Mixer: Current Focused App Mute",
+        "default": ""
+    },
 }

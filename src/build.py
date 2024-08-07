@@ -81,7 +81,7 @@ PLUGIN_ROOT = "TouchPortalMediaMixer"
 PLUGIN_ICON = r"icon.png"
 
 """ This tells tppbuild where you want finished build tpp to be saved at. Default "./" meaning current dir where tppbuild is running from. """
-OUTPUT_PATH = r"./"
+OUTPUT_PATH = r"../"
 
 """ PLUGIN_VERSION: A version string for the generated .tpp file name. This example reads the `__version__` from the example plugin's code. """
 from tppEntry import __version__

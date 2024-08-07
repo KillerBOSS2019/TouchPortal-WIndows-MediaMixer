@@ -5,14 +5,36 @@ a TouchPortal plugin that allows you to control Window's default audio mixer.
 - [Change Log](#change-log)
 - [What is this?](#what-is-this)
 - [Functionality](#functionality)
-    - [Action](#action)
-    - [State](#state)
+    - [Actions](#actions)
+    - [States](#states)
+    - [Sliders](#sliders)
 - [Versioning](#versioning)
 - [Lincense](#license)
 - [Bugs/Echancements](#bugsenhancements)
 
 # Change Log
 ```
+
+v2.0.0 - Major Updates to Audio Management and User Interaction & Performance
+    New:
+        - Added options to set, increase, and decrease the volume for audio devices.
+        - Added `SetDeviceMute` function to control individual device mute states.
+        - Introduced onHold capability for `SetDeviceVolume`.
+        - Implemented bidirectional sliders for all input/output devices.
+        - Added a new `WindowFocusListener` class to handle window focus events and update  accordingly.     (No more polling with `pygetwindow`)
+        - Enhanced `audioManager.py` with new methods to manage default input/output devices and        focused app mute states more effectively.
+
+    Improvements:
+
+        - Plugin is now purely event-based (no more polling).
+        - Removed the unnecessary `stateUpdate` function to reduce CPU/memory usage.
+        - Added try/except/finally blocks to ensure proper cleanup and avoid redundant calls.
+        - Improved error prevention and stability with additional try/except/finally blocks and         exception handling for various functions.
+        - Refactored code to separate concerns into distinct files and classes for better       maintainability.
+        - Removed obsolete imports and functions to streamline the codebase.
+        - Enhanced integration with `TPClient` and registered callbacks for default device changes  and  volume/mute adjustments.
+        - Added functions to fetch devices and initialize default devices upon startup.
+
 v1.5.1 - Fixed listId not updating correctly
     Bug Fixes:
         - Fixed listId not updating correctly
@@ -86,54 +108,99 @@ Have you ever wondering if theres a way to easily control Windows Volume Mixer w
 
 # Functionality
 
-## Action
+## Actions
 ![Action List](images/actions.png)
 
-- Volume Mixer: Mute/Unmute process volume
-    - This allows you to Toggle/Mute/Unmute any program you pick.
-- Adjust App Volume
-    - It allows you to Increase/Decrease/Set any application Volume
-- Audio Output/Input Device Switcher
-    - This allows you to change global default or communication audio device.
-- Audio Output/Input Device Toggle
-    - This allows you to toggle the default global audio or communication device between two choices.
-- Set Device Volume
-    - This allows you to set Micrphone or Speaker volume.
-- Individual App Audio Device switcher
-    - allows you to change app's volume source to a different audio device.
+- **`Audio Output/Input Device Switcher`**
+    - **Description:** This allows you to change **global default** or **communication audio device**.
 
-## State
+- **`Audio Output/Input Device Toggle`**
+    - **Description:** This allows you to **toggle** the default global audio or communication device between two choices.
+
+- **`Set Device Volume`**
+    - **Description:** This allows you to set, increase, or decrease the volume of your **Input & Output devices**.
+
+- **`Set Device Mute`**
+    - **Description:** This allows you to mute or unmute your **Input & Output devices**.
+
+- **`Mute/Unmute Process Volume`**
+    - **Description:** This allows you to **Toggle/Mute/Unmute** any program you pick.
+
+- **`Adjust App Volume`**
+    - **Description:** This allows you to **Increase/Decrease/Set** any application volume.
+
+- **`Individual App Audio Device Switcher`**
+    - **Description:** This allows you to change an app's volume source to a different **audio device**.
+
+## States
+
 ![State list](images/states.png)
 ![Audio state](images/AudioDevice.png)
 
-This plugin will create for each application
-- appname.exe Mute state
-   - This gives `Muted` or `Un-muted` depends on application
-- is appname.exe Active
-    - This gives `True` or `False` It will show `True` if application is playing sound
-- appname.exe Volume
-    - This shows this application's volume
-- Audio Device: Get default Output devices
-    - This shows your current Default output device
-- Audio Device: Get default Output communication devices
-    - This shows your Default output communication device
-- Audio Device: Get default input device
-    - This shows your default input device
-- Audio Device: Get default input communication device
-    - This shows your default input communication device
-- Volume Mixer: current focused app
-    - This gives you current focused app
-- Volume Mixer: Get Current Master Volume
-    - shows current master volume via states ranging 0-100
-- Volume Mixer: focused app volume
-    - shows current focused app volume as a state.
+### Application States
 
-### Slider
+- **`is appname.exe Active`**
+  - **Description:** Indicates whether the application is currently playing sound.
+  - **Values:** `True` or `False`
 
-This plugin also includes slider functionality. to use this feature simply change button type to `Slider` then you will have
-- Volume Mixer: APP Volume slider
-    - when button type is slider, you have ability to change selected app volume
-     using slider also includes Current app (controls volume on whatever is on focus) and control master volume too! 
+- **`appname.exe Mute state`**
+  - **Description:** Shows the mute status of the application.
+  - **Values:** `Muted` or `Un-muted`
+
+- **`appname.exe Volume`**
+  - **Description:** Displays the volume level of the application.
+  - **Range:** `0-100`
+
+### Audio Device States
+
+- **`Audio Device: Default Output Device`**
+  - **Description:** Displays the currently selected default output audio device.
+
+- **`Audio Device: Default Output Communication Device`**
+  - **Description:** Displays the currently selected default output communication device.
+
+- **`Audio Device: Default Input Device`**
+  - **Description:** Shows the currently selected default input audio device.
+
+- **`Audio Device: Default Input Communication Device`**
+  - **Description:** Shows the currently selected default input communication device.
+
+### Volume Mixer States
+
+- **`Volume Mixer: Current Master Volume`**
+  - **Description:** Displays the current master output volume.
+  - **Range:** `0-100`
+
+- **`Volume Mixer: Current Master Input Volume`**
+  - **Description:** Displays the current master input volume.
+  - **Range:** `0-100`
+
+- **`Volume Mixer: Current Focused App`**
+  - **Description:** Displays the name of the currently focused application.
+
+- **`Volume Mixer: Focused App Volume`**
+  - **Description:** Displays the volume level of the currently focused application.
+  - **Range:** `0-100`
+
+- **`Volume Mixer: Focused App Mute`**
+  - **Description:** Shows the mute status of the currently focused application.
+  - **Values:** `Muted` or `Un-muted`
+`
+
+### Sliders
+![Sliders list](images/sliders.png)
+
+This plugin also includes slider functionality. To use this feature, simply change the button type to `Slider`. You will have access to the following sliders:
+
+- **`Volume Mixer: APP Volume Slider`**
+  - **Description:** Allows you to adjust the volume of the selected application using a slider.
+  - **Features:** 
+    - Includes the ability to control the volume of the current app (whatever is in focus).
+    - Also allows you to adjust the master volume.
+
+- **`Volume Mixer: Input/Output Devices Volume Slider`**
+  - **Description:** Adjust the volume of your input/output audio devices using sliders.
+
 
 # Versioning
 
